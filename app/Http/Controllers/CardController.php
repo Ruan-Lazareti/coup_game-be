@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Card;
+use App\Models\Perk;
 
 class CardController extends Controller
 {
@@ -15,7 +16,9 @@ class CardController extends Controller
 
     public function show($id)
     {
-        return Card::findOrFail($id);
+			$card = Card::find($id);
+	    $perks = Card::find($id)->perks()->get();
+        return [$perks, $card];
     }
 
     public function store(Request $request)
@@ -28,13 +31,13 @@ class CardController extends Controller
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('images', 'public');
-            $validatedData['image'] = $path; // Salva o caminho da imagem no banco de dados
+            $validatedData['image'] = $path;
         } else {
-            $validatedData['image'] = 'f'; // Certifique-se de que 'image' pode ser nulo
+            $validatedData['image'] = 'f';
         }
 
         $card = Card::create($validatedData);
-        $card->perks()->sync($request->perks);
+        $card->perks()->attach($request->perks);
 
         return response()->json($card, 201);
     }
@@ -48,7 +51,10 @@ class CardController extends Controller
 
     public function destroy($id)
     {
+				$path = card::find($id)->image;
+				$del = Storage::disk('public')->delete($path);
         Card::destroy($id);
-        return response()->json(null, 204);
+        return response()->json('Carta deletada com sucesso!', 201);
     }
+
 }

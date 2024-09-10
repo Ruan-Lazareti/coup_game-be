@@ -2,17 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Perk extends Model
 {
-    protected $table = 'perks';
-
     protected $fillable = [
-        'id',
-        'perk'
+        'perk',
+	      'description'
     ];
 
     public function cards():belongsToMany

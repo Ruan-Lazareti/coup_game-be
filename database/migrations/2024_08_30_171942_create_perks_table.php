@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('perks', function (Blueprint $table) {
             $table->id();
             $table->string('perk');
+            $table->string('description');
             $table->timestamps();
         });
     }
