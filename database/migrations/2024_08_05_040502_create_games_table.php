@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
-            $table->string('status');
+            $table->string('status')->default('waiting');
             $table->timestamps();
         });
     }

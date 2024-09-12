@@ -2,17 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Game extends Model
 {
-    use HasFactory;
-
-    protected $table = 'games';
-
-    public function cards()
+		protected $fillable =  ['status'];
+    public function players(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(Card::class);
+        return $this->hasMany(Player::class);
     }
 }
