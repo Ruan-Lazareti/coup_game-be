@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Events\GameStarted;
+use App\Events\TurnChanged;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Broadcast;
 
 use App\Models\Game;
 use App\Models\Card;
@@ -13,9 +12,11 @@ use App\Models\Player;
 use App\Models\PlayerCard;
 
 use App\Events\PlayerJoined;
+use App\Events\PlayerUpdated;
 
 class GameController extends Controller
 {
+	//Funções pra iniciar o jogo
 	public function createGame()
 	{
 		$game = Game::create();
@@ -36,15 +37,6 @@ class GameController extends Controller
 		broadcast(new PlayerJoined($player))->toOthers();
 
 		return response()->json($player);
-
-		/*
-		Implementação de deixar a lista de players nos dados da sessão
-		Mas estava dando problema porque cada player tem sua própria sessão
-
-		$players = $request->session()->get('players', []);
-		$players[] = $player;
-		$request->session()->put('players', $players);
-		*/
 	}
 
 	public function getPlayers(Request $request) {
@@ -57,10 +49,16 @@ class GameController extends Controller
 	public function startGame(Request $request)
 	{
 		$gameId = $request->input('game_id');
+		$game = Game::find($gameId);
+		$randomPlayer = Player::where('game_id', $gameId)->inRandomOrder()->first();
+
+		$game->current_player_id = $randomPlayer->id;
+		$game->save();
 
 		$this->dealCards($gameId);
 
 		broadcast(new GameStarted($gameId))->toOthers();
+		broadcast(new TurnChanged($randomPlayer))->toOthers();
 
 		return response()->json(['message' => $gameId]);
 	}
@@ -101,6 +99,68 @@ class GameController extends Controller
 												 ->pluck('card');
 
 			return response()->json($cards);
+		} else {
+			return response()->json([], 404);
+		}
+	}
+
+
+	//Funcionalidades do jogo
+
+	public function updatePlayers($game) {
+		$players = Player::where('game_id', $game->id)->get();
+
+		broadcast(new PlayerUpdated($players))->toOthers();
+
+		return response()->json($players);
+	}
+	public function nextTurn($player, $game)
+	{
+		$nextPlayer = Player::where('game_id', $game->id)
+			->where('id', '>', $player->id)
+			->orderBy('id')
+			->first();
+
+		if($nextPlayer) {
+			$game->current_player_id = $nextPlayer->id;
+			$game->save();
+
+			broadcast(new TurnChanged($nextPlayer))->toOthers();
+
+			return response()->json([], 200);
+		} else {
+			$nextPlayer = Player::where('game_id', $game->id)
+				->orderBy('id')
+				->first();
+
+			$game->current_player_id = $nextPlayer->id;
+			$game->save();
+
+			broadcast(new TurnChanged($nextPlayer))->toOthers();
+
+			return response()->json([], 200);
+		}
+	}
+
+	public function income(Request $request)
+	{
+		$sessionId = $request->query('session_id');
+		$gameId = $request->query('game_id');
+
+		$player = Player::where('session_id', $sessionId)
+			->where('game_id', $gameId)
+			->first();
+		$game = Game::find($gameId);
+
+		if ($player && $game && $game->current_player_id == $player->id) {
+			$player->coins += 1;
+			$player->save();
+
+			$this->nextTurn($player, $game);
+
+			broadcast(new PlayerUpdated($player))->toOthers();
+
+			return response()->json($player);
 		} else {
 			return response()->json([], 404);
 		}
