@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('players', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-						$table->string('session_id');
+			$table->integer('coins')->default(0);
+			$table->string('session_id');
             $table->foreignId('game_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
