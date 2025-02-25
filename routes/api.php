@@ -11,11 +11,12 @@ use App\Http\Controllers\GameController;
 
 	//Rotas pra iniciar o jogo
 	Route::group(['middleware' => ['web']], function () {
-		Route::post('/game/create', [GameController::class, 'createGame']);
-		Route::get('/game/players', [GameController::class, 'getPlayers']);
-		Route::post('/game/join', [GameController::class, 'joinGame']);
-		Route::post('/game/start', [GameController::class, 'startGame']);
-		Route::get('/game/player-cards', [GameController::class, 'getPlayerCards']);
+        Route::post('/game', [GameController::class, 'createGame']);
+        Route::get('/game/{gameId}', [GameController::class, 'getGame']);
+        Route::put('/game/{gameId}', [GameController::class, 'updateGameState']);
+        Route::delete('/game/{gameId}', [GameController::class, 'deleteGame']);
+
+        Route::post('/game/join/{gameId}', [GameController::class, 'joinGame']);
 	});
 
 	//Rotas de funcionalidade do jogo
