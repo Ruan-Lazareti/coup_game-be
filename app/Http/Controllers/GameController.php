@@ -50,9 +50,9 @@ class GameController extends Controller
             return response()->json(['message' => 'Nickname não pode ser vazio'], 400);
         }
 
-        $game = $this->gameService->joinGame($gameId, $nickname);
+        $gameData = $this->gameService->joinGame($gameId, $nickname);
 
-        return response()->json($game);
+        return response()->json($gameData);
     }
 
     public function deleteGame($gameId)

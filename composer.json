@@ -1,7 +1,7 @@
 {
     "name": "laravel/laravel",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Coup game.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
@@ -34,6 +34,9 @@
         }
     },
     "scripts": {
+        "serve": [
+            "php artisan serve & php artisan reverb:start"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

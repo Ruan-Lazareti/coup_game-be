@@ -7,14 +7,16 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
 class PlayerJoined implements ShouldBroadcast
 {
-    public $player;
-    public function __construct($player)
+    public $nickname;
+    public $gameId;
+    public function __construct($nickname, $gameId)
     {
-			$this->player = $player;
+        $this->nickname = $nickname;
+        $this->gameId = $gameId;
     }
 
     public function broadcastOn(): Channel
     {
-        return new Channel('game.' . $this->player->game_id);
+        return new Channel('game.' . $this->gameId);
     }
 }

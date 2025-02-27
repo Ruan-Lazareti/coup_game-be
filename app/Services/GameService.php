@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\PlayerJoined;
 use Illuminate\Support\Facades\Redis;
 
 class GameService
@@ -54,9 +55,11 @@ class GameService
 
         $players[] = $nickname;
 
-        Redis::hmset($gameKey, ['players' => json_encode($players)]);
+        Redis::hset($gameKey, 'players', json_encode($players));
 
-        return ['message' => 'Jogador Conectado'];
+        broadcast(new PlayerJoined($nickname, $gameId));
+
+        return ['message' => 'Jogador Conectado', 'players' => $players];
     }
 
     public function updateGameState($gameId, $state)
